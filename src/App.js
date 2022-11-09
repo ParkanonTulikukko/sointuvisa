@@ -6,14 +6,11 @@ function satunnainen_sointu(soinnut) {
   return soinnut[Math.floor(Math.random()*soinnut.length)];
   }
 
+const savelet = ["C", "C# Db", "D", "D# Eb", "E", "F", "F# Gb", "G", "G# Ab", "A", "A# Hb Bb", "H B"]
+
 function App() {
-  const [ sointu, setSointu] = useState('C');
-  const [ vastaus, setVastaus] = useState([]);
-  const [ laskuri, setLaskuri] = useState(3);
 
-  const savelet = ["C", "C# Db", "D", "D# Eb", "E", "F", "F# Gb", "G", "G# Ab", "A", "A# Hb Bb", "H B"]
-
-  let tulos = ""
+  //KAI SITÄ PERKULE PITÄÄ PERUTTAA SIIHEN KOHTAAN ETTÄ SAI TON RANDOM SOINTUKIRJAIMEN TOIMIIN
 
   const collection = new Map();
   collection.set("C", ["C", "E", "G"]);
@@ -29,8 +26,36 @@ function App() {
   collection.set("A# Hb Bb", ["A# Hb Bb","D","F"]);
   collection.set("H B", ["H B","D# Eb","F# Gb"]); 
 
+  const [ sointu, setSointu] = useState("");
+  const [ vastaus, setVastaus] = useState([]);
+  const [ laskuri, setLaskuri] = useState(3);
+  const [ tulos, setTulos ] = useState("");
+  const [ sekunnit, setSekunnit ] = useState(0);
+  const [ soinnut, setSoinnut ] = useState([...savelet])
+
+  useEffect(() => {
+    console.log("use effect soinnut:" + soinnut)
+    setSointu(satunnainen_sointu(soinnut))
+    /*
+    const interval = setInterval(() => {
+      console.log('This will run every second!');
+      setSekunnit(sekunnit => sekunnit + 1);
+    }, 1000);
+    return () => clearInterval(interval);*/
+  }, []);
+
+  useEffect(() => {
+    if (soinnut.length == 0) {
+      setSointu("Loppu!")
+      }
+    else {
+      let tmpSointu = satunnainen_sointu(soinnut)
+      setSointu(tmpSointu)
+      }
+    }, [soinnut]);
+
   const tallennaSavel = (e) => {
-    let vastausTmp =  vastaus
+    let vastausTmp = vastaus
     vastausTmp.push(e.target.value);
 
     console.log(vastausTmp);
@@ -40,13 +65,24 @@ function App() {
     setLaskuri(laskuri - 1);
     console.log(laskuri)
     if (laskuri == 1) {
-      console.log(vastaus)
       if (oikeatSavelet(collection.get(sointu), vastaus)) {
-        console.log("oikein!")
-        setSointu(satunnainen_sointu(savelet))
+        setTulos("oikein!");
+        let tmpSoinnut = [...soinnut];
+        tmpSoinnut.splice(soinnut.indexOf(sointu), 1); 
+        setSoinnut(tmpSoinnut);
+        /*
+        console.log("oikein!");
+        //poistetaan sointu sointu-taulukosta
+        console.log("soinnutsize: " + soinnut.length);
+        console.log(soinnut);
+        setSoinnut([...soinnut.splice(soinnut.indexOf(sointu), 1)]);        
+        console.log("soinnusize sitten: " + soinnut.length);
+        */
         }
       else {
-        console.log("väärin :(")
+        console.log("sointuja jälkellä: " + soinnut);
+        setTulos("väärin :(");
+        setSointu(satunnainen_sointu(soinnut))
         }
       setVastaus([])
       setLaskuri(3)
@@ -69,7 +105,7 @@ function App() {
     <div className="App">
       <header className="App-header">
         <h1>{sointu}</h1> 
-        
+        <h2>{sekunnit}</h2>
         {savelet.slice(0).reverse().map(savel =>
           <div><button type="button" onClick={tallennaSavel} value={savel}>{savel}</button><br /></div>
           )}

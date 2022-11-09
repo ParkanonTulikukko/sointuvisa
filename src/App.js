@@ -32,21 +32,34 @@ function App() {
   const [ tulos, setTulos ] = useState("");
   const [ sekunnit, setSekunnit ] = useState(0);
   const [ soinnut, setSoinnut ] = useState([...savelet])
+  const [ kelloKay, setKelloKay ] = useState(true);
+  const [ tulokset, setTulokset ] = useState([100,200]);
 
   useEffect(() => {
-    console.log("use effect soinnut:" + soinnut)
     setSointu(satunnainen_sointu(soinnut))
-    /*
-    const interval = setInterval(() => {
-      console.log('This will run every second!');
-      setSekunnit(sekunnit => sekunnit + 1);
-    }, 1000);
-    return () => clearInterval(interval);*/
-  }, []);
+    }, []);
+
+  useEffect(() => {
+    let interval;
+    if (kelloKay) {
+      interval = setInterval(() => {
+        console.log('This will run every second!');
+        setSekunnit(sekunnit => sekunnit + 1);
+        }, 1000);
+      }
+    else if (!kelloKay) {
+      clearInterval(interval);
+      }    
+    return () => clearInterval(interval);
+    }, [kelloKay]);  
 
   useEffect(() => {
     if (soinnut.length == 0) {
-      setSointu("Loppu!")
+      setSointu("Loppu!");
+      setKelloKay(false);
+      let tmpTulokset = tulokset;
+      tmpTulokset.unshift(sekunnit);
+      setTulokset(tmpTulokset);
       }
     else {
       let tmpSointu = satunnainen_sointu(soinnut)
@@ -70,14 +83,6 @@ function App() {
         let tmpSoinnut = [...soinnut];
         tmpSoinnut.splice(soinnut.indexOf(sointu), 1); 
         setSoinnut(tmpSoinnut);
-        /*
-        console.log("oikein!");
-        //poistetaan sointu sointu-taulukosta
-        console.log("soinnutsize: " + soinnut.length);
-        console.log(soinnut);
-        setSoinnut([...soinnut.splice(soinnut.indexOf(sointu), 1)]);        
-        console.log("soinnusize sitten: " + soinnut.length);
-        */
         }
       else {
         console.log("sointuja jälkellä: " + soinnut);
@@ -88,6 +93,12 @@ function App() {
       setLaskuri(3)
       }
     }  
+
+  const aloitaAlusta = (e) => { 
+    setSoinnut([...savelet]);
+    setSekunnit(0);
+    setKelloKay(true);
+    }
 
   function oikeatSavelet(array1, array2) {
     if (array1.length === array2.length) {
@@ -104,13 +115,15 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>{sointu}</h1> 
-        <h2>{sekunnit}</h2>
+        <h2>{sointu}</h2> 
+        <h3>{sekunnit}</h3>
+        {tulokset.map(tulos => <span>{tulos}</span>)}
         {savelet.slice(0).reverse().map(savel =>
-          <div><button type="button" onClick={tallennaSavel} value={savel}>{savel}</button><br /></div>
+          <button type="button" onClick={tallennaSavel} value={savel}>{savel}</button>
           )}
         <h2>{vastaus}</h2>
         <h2>{tulos}</h2>
+        <button type="button" onClick={aloitaAlusta}>aloita alusta</button>
         <img src={logo} className="App-logo" alt="logo" />
         <p>
           Edit <code>src/App.js</code> and save to reload.

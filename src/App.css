@@ -1,10 +1,21 @@
 .App {
   text-align: center;
+  margin: auto;
+  width: 100%;
+
 }
 
 .App-logo {
   height: 40vmin;
   pointer-events: none;
+}
+
+table, th, td {
+  margin-top: 20px;
+  margin-bottom: 10px;
+  margin-left: auto;
+  margin-right: auto;  
+  border: 1px solid;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -13,19 +24,40 @@
   }
 }
 
+#aika {
+  float: left;
+  position: fixed;
+  padding-left:10px;
+}
+
 .App-header {
-  background-color: #282c34;
+  background-color: #ffffff;
   min-height: 100vh;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
-  color: white;
+  color: rgb(0, 0, 0);
 }
 
 .App-link {
   color: #61dafb;
+}
+
+button {
+  height: 100px;
+  width: 100px;
+  background-color: blue;
+  border: none;
+  color: white;
+  padding: 10px 10px;
+  text-align: center;
+  text-decoration: none;
+  display: inline;
+  font-size: 18px;
+  margin: 1px 1px;
+  cursor: pointer;
 }
 
 @keyframes App-logo-spin {

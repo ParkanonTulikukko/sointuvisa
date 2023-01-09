@@ -10,8 +10,6 @@ const savelet = ["C", "C# Db", "D", "D# Eb", "E", "F", "F# Gb", "G", "G# Ab", "A
 
 function App() {
 
-  //KAI SITÄ PERKULE PITÄÄ PERUTTAA SIIHEN KOHTAAN ETTÄ SAI TON RANDOM SOINTUKIRJAIMEN TOIMIIN
-
   const collection = new Map();
   collection.set("C", ["C", "E", "G"]);
   collection.set("C# Db", ["C# Db","F","G# Ab"]);
@@ -31,6 +29,7 @@ function App() {
   const [ laskuri, setLaskuri] = useState(3);
   const [ tulos, setTulos ] = useState("");
   const [ sekunnit, setSekunnit ] = useState(0);
+  const [ aika, setAika ] = useState("0 s");
   const [ soinnut, setSoinnut ] = useState([...savelet])
   const [ kelloKay, setKelloKay ] = useState(true);
   const [ tulokset, setTulokset ] = useState([100,200]);
@@ -38,6 +37,19 @@ function App() {
   useEffect(() => {
     setSointu(satunnainen_sointu(soinnut))
     }, []);
+
+  function sekunnitMinuuteiksi(sekunnit) {
+    let minuutit = Math.floor(sekunnit / 60);
+    let extrasekunnit = sekunnit % 60;
+    minuutit = minuutit < 10 ? "0" + minuutit : minuutit;
+    extrasekunnit = extrasekunnit < 10 ? "0" + extrasekunnit : extrasekunnit;
+    return minuutit + ":" + extrasekunnit;
+    }
+
+  useEffect(() => {
+    console.log(sekunnit);
+    setAika(sekunnitMinuuteiksi(sekunnit));
+    }, [sekunnit]);  
 
   useEffect(() => {
     let interval;
@@ -85,7 +97,7 @@ function App() {
         setSoinnut(tmpSoinnut);
         }
       else {
-        console.log("sointuja jälkellä: " + soinnut);
+        console.log("sointuja jäljellä: " + soinnut);
         setTulos("väärin :(");
         setSointu(satunnainen_sointu(soinnut))
         }
@@ -111,32 +123,44 @@ function App() {
       }
     return false;
     }
+  
+  let nakyma;  
+
+  if (kelloKay) {
+    nakyma =       
+    <span>
+    <h2 id="aika">{aika}</h2>
+    <h2>{sointu}</h2> 
+    {savelet.slice(0).reverse().map(savel => {
+      return <button type="button" onClick={tallennaSavel} value={savel}>{savel}</button>
+      })
+      }
+    <br/>
+    {nakyma}
+    <h2>{vastaus}</h2>
+    <br/>
+    </span>
+    }
+
+  else {
+    nakyma = 
+    <table>
+      <caption>Tulokset</caption>
+      <tbody>
+        <tr>
+          <th>Pelaaja</th>
+          <th>Aika</th>
+        </tr>
+        {tulokset.map(tulos => <tr><td>Anonymous</td><td>{tulos}</td></tr>)}
+      </tbody>
+    </table>  
+    }
 
   return (
     <div className="App">
-      <header className="App-header">
-        <h2>{sointu}</h2> 
-        <h3>{sekunnit}</h3>
-        {tulokset.map(tulos => <span>{tulos}</span>)}
-        {savelet.slice(0).reverse().map(savel =>
-          <button type="button" onClick={tallennaSavel} value={savel}>{savel}</button>
-          )}
-        <h2>{vastaus}</h2>
-        <h2>{tulos}</h2>
-        <button type="button" onClick={aloitaAlusta}>aloita alusta</button>
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      {nakyma}
+      <button type="button" onClick={aloitaAlusta}>aloita alusta</button>
+      <button type="button" onClick={() => setKelloKay(false) }>pysäytä kello</button>
     </div>
   );
 }

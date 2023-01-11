@@ -26,7 +26,6 @@ function App() {
 
   const [ sointu, setSointu] = useState("");
   const [ vastaus, setVastaus] = useState([]);
-  const [ laskuri, setLaskuri] = useState(3);
   const [ tulos, setTulos ] = useState("");
   const [ sekunnit, setSekunnit ] = useState(0);
   const [ aika, setAika ] = useState("0 s");
@@ -47,7 +46,7 @@ function App() {
     }
 
   useEffect(() => {
-    console.log(sekunnit);
+    //console.log(sekunnit);
     setAika(sekunnitMinuuteiksi(sekunnit));
     }, [sekunnit]);  
 
@@ -55,7 +54,7 @@ function App() {
     let interval;
     if (kelloKay) {
       interval = setInterval(() => {
-        console.log('This will run every second!');
+        //console.log('This will run every second!');
         setSekunnit(sekunnit => sekunnit + 1);
         }, 1000);
       }
@@ -78,32 +77,58 @@ function App() {
       setSointu(tmpSointu)
       }
     }, [soinnut]);
+  
+  function tallennaSavel(e) {
 
-  const tallennaSavel = (e) => {
-    let vastausTmp = vastaus
-    vastausTmp.push(e.target.value);
-
-    console.log(vastausTmp);
-    setVastaus([...vastausTmp]);
-    console.log(vastaus)
-
-    setLaskuri(laskuri - 1);
-    console.log(laskuri)
-    if (laskuri == 1) {
-      if (oikeatSavelet(collection.get(sointu), vastaus)) {
-        setTulos("oikein!");
-        let tmpSoinnut = [...soinnut];
-        tmpSoinnut.splice(soinnut.indexOf(sointu), 1); 
-        setSoinnut(tmpSoinnut);
-        }
-      else {
-        console.log("sointuja jäljellä: " + soinnut);
-        setTulos("väärin :(");
-        setSointu(satunnainen_sointu(soinnut))
-        }
+    if (vastaus.length >= 3) {
       setVastaus([])
-      setLaskuri(3)
+      setVastaus((vastaus) => {
+        console.log("tyhjennettiin vastaus ja sen sisältö on nyt: " + vastaus) 
+        return vastaus 
+        });
       }
+
+    //eli eli pitäs olla hereillä siinä
+    //kohtaa kun vastausta muutetaan setVastauksella,
+    //ja sen jälkeen vähän tiedustella mitä tehdään
+    //mukana pitäis olla myös e.target.valuea, eli 
+    //se mitä ollaan just näppäilty
+    //console.log("mitäs se lengthi on ennen kaikkea: " + vastaus.length)
+    //console.log(vastaus.length >= 3)
+
+    //laitetaan array temppi-tiedostoon
+    //console.log("mikä se state on?: " + state) 
+    //let vastausTmp = vastaus
+    //lisätään temppiin juuri valittu sointu lisäksi
+    //vastausTmp.push(e.target.value)
+    //console.log(vastausTmp);
+    //ja sit se temppi vaan yksinkertaisesti tungetaan "oikeaan" vastaukseen
+    //setVastaus([])
+
+    //tässä laitetaan vastaus-arryhin uusi item. 
+    // sen jälkeen ehkä lenghti on kolme, ehkä ei, ja 
+    // vastaus on ehkä oikein, ehkä ei. 
+
+    setVastaus((prev) => {
+      let vastaus = [...prev, e.target.value]
+      console.log("vastauslengthi callbakissä: " + vastaus.length);
+      if (vastaus.length >= 3) {
+        if (oikeatSavelet(collection.get(sointu), vastaus)) {
+          setTulos("oikein!");
+          console.log(tulos)  
+          //poistetaan oikein vastattu sointu loppujen joukosta
+          let tmpSoinnut = [...soinnut];
+          tmpSoinnut.splice(soinnut.indexOf(sointu), 1); 
+          setSoinnut(tmpSoinnut);
+          }
+        else {
+          console.log("sointuja jäljellä: " + soinnut);
+          setTulos("väärin :(");
+          setSointu(satunnainen_sointu(soinnut))
+          }
+        }
+      return [...prev, e.target.value]
+      }) 
     }  
 
   const aloitaAlusta = (e) => { 
@@ -123,6 +148,22 @@ function App() {
       }
     return false;
     }
+
+  function palautaVari(savel) {
+    
+    if (!vastaus.includes(savel)) { 
+      return "blue"
+      }
+    else {
+      if (vastaus.length < 3) {
+        return "darkblue"
+        }
+        if (tulos === "oikein!") {
+          return "green"
+          }
+        return "red"  
+      }   
+    }  
   
   let nakyma;  
 
@@ -130,11 +171,19 @@ function App() {
     nakyma =       
     <span>
     <h2 id="aika">{aika}</h2>
-    <h2>{sointu}</h2> 
+    <h1 style={{fontSize: '5vw'}}>{sointu}</h1> 
     {savelet.slice(0).reverse().map(savel => {
-      return <button type="button" onClick={tallennaSavel} value={savel}>{savel}</button>
+      return ( 
+        <button 
+          type="button" 
+          style={{ backgroundColor: 
+                 palautaVari(savel) }}
+          onClick={tallennaSavel} 
+          value={savel}>
+          {savel}
+        </button>)
       })
-      }
+    }
     <br/>
     {nakyma}
     <h2>{vastaus}</h2>

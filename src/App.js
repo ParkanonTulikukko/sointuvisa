@@ -32,6 +32,7 @@ function App() {
   const [ soinnut, setSoinnut ] = useState([...savelet])
   const [ kelloKay, setKelloKay ] = useState(true);
   const [ tulokset, setTulokset ] = useState([100,200]);
+  const [ valoPaalle, setValoPaalle ] = useState(true);
 
   useEffect(() => {
     setSointu(satunnainen_sointu(soinnut))
@@ -49,7 +50,7 @@ function App() {
     //console.log(sekunnit);
     setAika(sekunnitMinuuteiksi(sekunnit));
     }, [sekunnit]);  
-
+  
   useEffect(() => {
     let interval;
     if (kelloKay) {
@@ -71,12 +72,35 @@ function App() {
       let tmpTulokset = tulokset;
       tmpTulokset.unshift(sekunnit);
       setTulokset(tmpTulokset);
+      setVastaus([]);
       }
     else {
       let tmpSointu = satunnainen_sointu(soinnut)
       setSointu(tmpSointu)
       }
     }, [soinnut]);
+
+  useEffect(() => {
+
+    if (vastaus.length >= 3) {
+      var numberOfTimes = 8;
+      var delay = 250;
+
+      for (let i = 0; i < numberOfTimes; i++) {
+        setTimeout(function () {
+          console.log(valoPaalle);
+          setValoPaalle((prev) => {
+            if (prev === true) {
+              return false
+              } 
+            else {
+              return true
+              }
+            })//setVastaus  
+          }, i * delay)//setTimeout
+        }//for
+      }//if  
+    }, [vastaus]);  
   
   function tallennaSavel(e) {
 
@@ -88,34 +112,13 @@ function App() {
         });
       }
 
-    //eli eli pitäs olla hereillä siinä
-    //kohtaa kun vastausta muutetaan setVastauksella,
-    //ja sen jälkeen vähän tiedustella mitä tehdään
-    //mukana pitäis olla myös e.target.valuea, eli 
-    //se mitä ollaan just näppäilty
-    //console.log("mitäs se lengthi on ennen kaikkea: " + vastaus.length)
-    //console.log(vastaus.length >= 3)
-
-    //laitetaan array temppi-tiedostoon
-    //console.log("mikä se state on?: " + state) 
-    //let vastausTmp = vastaus
-    //lisätään temppiin juuri valittu sointu lisäksi
-    //vastausTmp.push(e.target.value)
-    //console.log(vastausTmp);
-    //ja sit se temppi vaan yksinkertaisesti tungetaan "oikeaan" vastaukseen
-    //setVastaus([])
-
-    //tässä laitetaan vastaus-arryhin uusi item. 
-    // sen jälkeen ehkä lenghti on kolme, ehkä ei, ja 
-    // vastaus on ehkä oikein, ehkä ei. 
-
     setVastaus((prev) => {
       let vastaus = [...prev, e.target.value]
       console.log("vastauslengthi callbakissä: " + vastaus.length);
       if (vastaus.length >= 3) {
         if (oikeatSavelet(collection.get(sointu), vastaus)) {
           setTulos("oikein!");
-          console.log(tulos)  
+
           //poistetaan oikein vastattu sointu loppujen joukosta
           let tmpSoinnut = [...soinnut];
           tmpSoinnut.splice(soinnut.indexOf(sointu), 1); 
@@ -125,7 +128,7 @@ function App() {
           console.log("sointuja jäljellä: " + soinnut);
           setTulos("väärin :(");
           setSointu(satunnainen_sointu(soinnut))
-          }
+          } 
         }
       return [...prev, e.target.value]
       }) 
@@ -135,6 +138,7 @@ function App() {
     setSoinnut([...savelet]);
     setSekunnit(0);
     setKelloKay(true);
+    setVastaus([]);
     }
 
   function oikeatSavelet(array1, array2) {
@@ -150,20 +154,22 @@ function App() {
     }
 
   function palautaVari(savel) {
-    
     if (!vastaus.includes(savel)) { 
       return "blue"
       }
     else {
-      if (vastaus.length < 3) {
-        return "darkblue"
-        }
-        if (tulos === "oikein!") {
-          return "green"
-          }
-        return "red"  
-      }   
-    }  
+      if (vastaus.length >= 3) {    
+        if (valoPaalle === true) {
+          if (tulos === "oikein!")
+            return "green"
+          else 
+            return "red"  
+          }//valoPaalle === true
+        }//if (vastaus.length >= 3) { 
+      return "darkblue"  
+      }
+    }//palautaVari
+      
   
   let nakyma;  
 
@@ -171,13 +177,13 @@ function App() {
     nakyma =       
     <span>
     <h2 id="aika">{aika}</h2>
-    <h1 style={{fontSize: '5vw'}}>{sointu}</h1> 
+    <h1 style={{fontSize: '5em'}}>{sointu}</h1> 
     {savelet.slice(0).reverse().map(savel => {
       return ( 
         <button 
           type="button" 
           style={{ backgroundColor: 
-                 palautaVari(savel) }}
+                 palautaVari(savel)}}
           onClick={tallennaSavel} 
           value={savel}>
           {savel}
